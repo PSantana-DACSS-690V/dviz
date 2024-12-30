@@ -1,0 +1,79 @@
+---
+title: "DACSS Storyboard by Prisley Santana"
+output: 
+  flexdashboard::flex_dashboard
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(ggplot2)
+library(readr)
+```
+
+```{r}
+theFile <- read_csv("theFile.csv")
+filename="theFile.csv"
+mydata=read.csv("theFile.csv")
+
+locale_summary <- mydata %>%
+  group_by(LocaleType) %>%
+  summarise(School_Count = n(), .groups = 'drop')
+```
+
+## Sidebar {.sidebar}
+
+
+Preparing the dashboard based on the instructions given at @magallanes_reyes_data_2022, and @aden-buie_flexdashboard_2024.
+
+## Column {.tabset .tabset-fade}
+
+
+### Categorical Bar Plot
+
+```{r}
+base_plot <- ggplot(data = locale_summary, aes(x = LocaleType, y = School_Count))
+my_barplot <- base_plot +
+  geom_bar(stat = 'identity', fill = "#2C7BB6", color = "black") +
+  labs(
+    title = "Schools by Locale Type",
+    subtitle = "School Locations in the State of Washington (2019)",
+    x = "Locale Type",
+    y = "Number of Schools",
+    caption = "Data Source: US Department of Education"
+  ) +
+  theme_light() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16, color = "#1D3557"),
+    plot.subtitle = element_text(size = 12, color = "#457B9D"),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12)
+  )
+
+my_barplot
+
+saveRDS(my_barplot, file = "barplot.rds")
+```
+
+
+### Histogram
+
+```{r}
+
+```
+
+### Scatterplot
+
+```{r}
+
+```
+
+
+### Map
+
+```{r}
+
+```
+
+
+### References 
