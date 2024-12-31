@@ -1,5 +1,6 @@
 ---
 title: "DACSS Storyboard by Prisley Santana"
+bibliography: references.bib
 output: 
   flexdashboard::flex_dashboard
 ---
