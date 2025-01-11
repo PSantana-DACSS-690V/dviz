@@ -62,7 +62,6 @@ saveRDS(my_barplot, file = "barplot_updated.rds")
 ```{r}
 rm(list = ls())
 load(file = url("https://www.github.com/DACSS-Visual/tabular_bivar_catcat/raw/main/data/crime.RData"))
-
 top_crimecats <- crime %>%
   count(crimecat, sort = TRUE) %>%
   slice_head(n = 5) %>%
@@ -83,7 +82,7 @@ my_barplot2 <- ggplot(data_processed, aes(x = Precinct, y = Share_of_Crimes, fil
     subtitle = "Percentage Breakdown of Most Common Crimes by Precinct",
     x = "Precinct",
     y = "Share of All Crimes (%)",
-    fill = "Crime Category (Reordered)",
+    fill = "Crime Category",
     caption = "Source: Seattle, WA - Open Data Portal"
   ) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) +
