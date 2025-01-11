@@ -30,7 +30,7 @@ Preparing the dashboard based on the instructions given at @magallanes_reyes_dat
 ## Column {.tabset .tabset-fade}
 
 
-### Categorical Bar Plot
+### Univariate Plot
 
 ```{r}
 base_plot <- ggplot(data = locale_summary, aes(x = reorder(LocaleType, -School_Count), y = School_Count))
@@ -57,16 +57,49 @@ saveRDS(my_barplot, file = "barplot_updated.rds")
 ```
 
 
-### Histogram
+### Bivariate Plot
 
 ```{r}
+rm(list = ls())
+load(file = url("https://www.github.com/DACSS-Visual/tabular_bivar_catcat/raw/main/data/crime.RData"))
 
-```
+top_crimecats <- crime %>%
+  count(crimecat, sort = TRUE) %>%
+  slice_head(n = 5) %>%
+  pull(crimecat)
 
-### Scatterplot
+data_processed <- crime %>%
+  filter(crimecat %in% top_crimecats, !is.na(Precinct)) %>%
+  group_by(Precinct, crimecat) %>%
+  summarise(Crime_Count = n(), .groups = "drop") %>%
+  group_by(Precinct) %>%
+  mutate(Share_of_Crimes = (Crime_Count / sum(Crime_Count)) * 100) %>%
+  ungroup()
 
-```{r}
+my_barplot2 <- ggplot(data_processed, aes(x = Precinct, y = Share_of_Crimes, fill = crimecat)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  labs(
+    title = "Top 5 Crimes by Precinct",
+    subtitle = "Percentage Breakdown of Most Common Crimes by Precinct",
+    x = NULL,
+    y = "Share of All Crimes (%)",
+    fill = "Crime Category",
+    caption = "Source: Seattle, WA - Open Data Portal"
+  ) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 12),
+    legend.position = "right"
+  )
 
+print(my_barplot2)
+
+saveRDS(my_barplot2, file = "bivariate_plot.rds")
 ```
 
 
