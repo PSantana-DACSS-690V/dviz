@@ -76,14 +76,14 @@ data_processed <- crime %>%
   mutate(Share_of_Crimes = (Crime_Count / sum(Crime_Count)) * 100) %>%
   ungroup()
 
-my_barplot2 <- ggplot(data_processed, aes(x = Precinct, y = Share_of_Crimes, fill = crimecat)) +
+my_barplot2 <- ggplot(data_processed, aes(x = Precinct, y = Share_of_Crimes, fill = reorder(crimecat, Share_of_Crimes))) +
   geom_bar(stat = "identity", position = "dodge", color = "black") +
   labs(
     title = "Top 5 Crimes by Precinct",
     subtitle = "Percentage Breakdown of Most Common Crimes by Precinct",
-    x = NULL,
+    x = "Precinct",
     y = "Share of All Crimes (%)",
-    fill = "Crime Category",
+    fill = "Crime Category (Reordered)",
     caption = "Source: Seattle, WA - Open Data Portal"
   ) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) +
