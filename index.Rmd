@@ -10,6 +10,9 @@ library(flexdashboard)
 library(dplyr)
 library(ggplot2)
 library(readr)
+library(rio)
+library(sf)
+library(tidyr)
 ```
 
 ```{r}
@@ -105,7 +108,41 @@ saveRDS(my_barplot2, file = "bivariate_plot.rds")
 ### Map
 
 ```{r}
+linkBoston <- "https://github.com/DACSS-Visual/SpatialData/raw/refs/heads/main/data/BostonContrib.xlsx"
+bostonCont <- rio::import(linkBoston)
 
+linkZips <- 'https://raw.githubusercontent.com/DACSS-Visual/SpatialData/refs/heads/main/data/zip_codes.json'
+bostonZips <- sf::read_sf(linkZips)
+
+aggData <- bostonCont %>%
+  group_by(Zip, `Tender Type Description`) %>%
+  summarize(TotalAmount = sum(Amount, na.rm = TRUE), .groups = "drop")
+
+filteredData <- aggData %>%
+  filter(`Tender Type Description` %in% c("Check", "Credit Card")) %>%
+  pivot_wider(names_from = `Tender Type Description`, values_from = TotalAmount, 
+              values_fill = list(TotalAmount = 0))
+
+bostonMapData <- bostonZips %>%
+  left_join(filteredData, by = c("ZIP5" = "Zip"))
+
+map1 <- ggplot() +
+  geom_sf(data = bostonMapData, aes(fill = `Check`), color = "black") +
+  scale_fill_viridis_c(name = "Check Contributions", na.value = "gray90") +
+  ggtitle("Boston Contributions via Check") +
+  theme_minimal()
+
+map2 <- ggplot() +
+  geom_sf(data = bostonMapData, aes(fill = `Credit Card`), color = "black") +
+  scale_fill_viridis_c(name = "Credit Card Contributions", na.value = "gray90") +
+  ggtitle("Boston Contributions via Credit Card") +
+  theme_minimal()
+
+print(map1)
+print(map2)
+
+saveRDS(map1, file = "map1.rds")
+saveRDS(map2, file = "map2.rds")
 ```
 
 
