@@ -107,7 +107,7 @@ saveRDS(my_barplot2, file = "bivariate_plot.rds")
 
 ### Map
 
-```{r}
+```{r, fig.width=8, fig.height=4, out.width="100%"}
 linkBoston <- "https://github.com/DACSS-Visual/SpatialData/raw/refs/heads/main/data/BostonContrib.xlsx"
 bostonCont <- rio::import(linkBoston)
 
@@ -116,33 +116,35 @@ bostonZips <- sf::read_sf(linkZips)
 
 aggData <- bostonCont %>%
   group_by(Zip, `Tender Type Description`) %>%
-  summarize(TotalAmount = sum(Amount, na.rm = TRUE), .groups = "drop")
+  summarize(AverageAmount = mean(Amount, na.rm = TRUE), .groups = "drop")
 
 filteredData <- aggData %>%
-  filter(`Tender Type Description` %in% c("Check", "Credit Card")) %>%
-  pivot_wider(names_from = `Tender Type Description`, values_from = TotalAmount, 
-              values_fill = list(TotalAmount = 0))
+  filter(`Tender Type Description` %in% c("Check", "Credit Card"))
 
 bostonMapData <- bostonZips %>%
   left_join(filteredData, by = c("ZIP5" = "Zip"))
 
-map1 <- ggplot() +
-  geom_sf(data = bostonMapData, aes(fill = `Check`), color = "black") +
-  scale_fill_viridis_c(name = "Check Contributions", na.value = "gray90") +
-  ggtitle("Boston Contributions via Check") +
-  theme_minimal()
+bostonMapData_filtered <- bostonMapData %>%
+  filter(!is.na(AverageAmount))
 
-map2 <- ggplot() +
-  geom_sf(data = bostonMapData, aes(fill = `Credit Card`), color = "black") +
-  scale_fill_viridis_c(name = "Credit Card Contributions", na.value = "gray90") +
-  ggtitle("Boston Contributions via Credit Card") +
-  theme_minimal()
+facetMap <- ggplot(bostonMapData_filtered) +
+  geom_sf(aes(fill = AverageAmount), color = "black") +
+  facet_wrap(~`Tender Type Description`, ncol = 2) +
+  scale_fill_viridis_c(
+    name = "Average Contributions",
+    na.value = "gray90"
+  ) +
+  ggtitle("Boston Contributions: Check vs. Credit Card (Averages by ZIP)") +
+  theme_void() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.position = "bottom",
+    legend.key.width = unit(2, "cm")
+  )
 
-print(map1)
-print(map2)
+print(facetMap)
 
-saveRDS(map1, file = "map1.rds")
-saveRDS(map2, file = "map2.rds")
+saveRDS(facetMap, file = "bivariate_plot_faceted.rds")
 ```
 
 
